@@ -242,6 +242,16 @@ class ParametersCMSF(OrderedDict):
         
 
 
+class ParametersKT(OrderedDict):
+    def __init__(self):
+        super().__init__()
+        for name, parameter in ParametersCMSF().items():
+            self[name] = parameter
+
+        self.noBatch = ParametersCMSF().noBatch
+
+
+
 class ParametersRA(OrderedDict):
     def __init__(self):
         super().__init__()

@@ -26,7 +26,8 @@ from mwm import MWM
 from of import OF
 from cmsf import CMSF
 from ra import RA
-from parameters import ParametersCM, ParametersMWM, ParametersOF, ParametersCMSF, ParametersRA
+from kt import KT
+from parameters import ParametersCM, ParametersMWM, ParametersOF, ParametersCMSF, ParametersRA, ParametersKT
 
 
 mode = None
@@ -47,7 +48,8 @@ dispatch = {"CM": Task(CM, "pair", ParametersCM()),
             "MWM": Task(MWM, "one", ParametersMWM()),
             "OF": Task(OF, "one", ParametersOF()),
             "CMSF": Task(CMSF, "one", ParametersCMSF()),
-            "RA": Task(RA, "pair", ParametersRA())}
+            "RA": Task(RA, "pair", ParametersRA()),
+            "KT": Task(KT, "one", ParametersKT())}
 
 fullname = OrderedDict()
 fullname["CM"] = "Carousel maze"
@@ -55,6 +57,7 @@ fullname["CMSF"] = "Carousel maze (single frame)"
 fullname["MWM"] = "Morris watter maze"
 fullname["OF"] = "Open field"
 fullname["RA"] = "Robot avoidance"
+fullname["KT"] = "Kachna Tracker"
 
 pairing = {"CM": ("Arena", "Room"),
            "RA": ("Rat", "Robot")}
@@ -63,7 +66,8 @@ time = {"CM": 20,
         "MWM": 1,
         "OF": 10,
         "CMSF": 20,
-        "RA": 20}
+        "RA": 20,
+        "KT": 20}
 
 
 def changeMode(newMode):

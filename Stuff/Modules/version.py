@@ -18,11 +18,11 @@ along with Carousel Maze Manager.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 def version():
-    return ['0', '4', '0']
+    return ['0', '5', '0']
 
 def date():
-    return "12 August 2014"
+    return "7 April 2017"
 
 def copyleft():
-    return "2013, 2014"
+    return "2013-2017"
     
