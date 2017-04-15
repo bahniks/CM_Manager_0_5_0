@@ -732,17 +732,8 @@ class Explorer(ttk.Frame):
             return True
 
 
-    def _createShockSector(self):
-        if m.mode == "CM":        
-            self.angle = self.cm.centerAngle
-            self.width = self.cm.width
-            a1 = radians(self.angle - (self.width / 2))
-            a2 = radians(self.angle + (self.width / 2))
-            Sx1, Sy1 = 150 + (cos(a1) * 130), 150 - (sin(a1) * 130)
-            Sx2, Sy2 = 150 + (cos(a2) * 130), 150 - (sin(a2) * 130)      
-            self.roomCanv.create_line((Sx1, Sy1, 150, 150, Sx2, Sy2), fill = "red", width = 2,\
-                                       tags = "shockZone")        
-        elif m.mode == "MWM":
+    def _createShockSector(self):     
+        if m.mode == "MWM":
             x = self.cm.platformX * self.scale + 20
             y = self.cm.platformY * self.scale + 20
             r = self.cm.platformRadius * self.scale
@@ -756,9 +747,17 @@ class Explorer(ttk.Frame):
                                       width = 2, tags = "shockZoneR")
             self.roomCanv.create_oval(142, 142, 158, 158, outline = "green3", fill = "green3",
                                       width = 2, tags = "robotR")            
-            
-            
+        else:        
+            self.angle = self.cm.centerAngle
+            self.width = self.cm.width
+            a1 = radians(self.angle - (self.width / 2))
+            a2 = radians(self.angle + (self.width / 2))
+            Sx1, Sy1 = 150 + (cos(a1) * 130), 150 - (sin(a1) * 130)
+            Sx2, Sy2 = 150 + (cos(a2) * 130), 150 - (sin(a2) * 130)      
+            self.roomCanv.create_line((Sx1, Sy1, 150, 150, Sx2, Sy2), fill = "red", width = 2,\
+                                       tags = "shockZone")               
 
+            
     def _drawTrack(self):
         if m.mode == "CM" or m.mode == "RA":
             data = [line[2:4] + line[6:9] for line in self.cm.data if
@@ -800,12 +799,13 @@ class Explorer(ttk.Frame):
                         shock[0]*self.scale + 24, shock[1]*self.scale + 24,
                         outline = "red", width = 3)         
         else:
+            displayThreshold = floor(3/self.scale)
             data = [line[2:4] for line in self.cm.data if self.minTime <= line[1] <= self.maxTime]
             points = []
             prev = [-100, -100, 0, -100, -100]
             last = 0
             for count, line in enumerate(data):
-                if abs(line[0] - prev[0]) + abs(line[1] - prev[1]) > 2 or count - last == 10:
+                if abs(line[0] - prev[0]) + abs(line[1] - prev[1]) > displayThreshold or count - last == 10:
                     points.append(line)
                     last = count
                 prev = line

@@ -131,24 +131,25 @@ class KT(CMSF):
         self.radius = self.trackerResolution * self.arenaDiameter * 100 / 2
         self.minX = self.centerX - self.radius
         self.minY = self.centerY - self.radius
+        self.innerRadius = 0
+        self.outerRadius = self.radius
              
 
     def _addReinforcedSector(self, string, position):
-        self.centerAngle = eval(string[position+3])   
+        self.centerAngle = eval(string[position+3]) + 90
         self.width = eval(string[position+4])         
-        self.innerRadius = eval(string[position+1])
-        self.outerRadius = eval(string[position+2]) # to bude asi jinak
 
 
-    def _processRoomFile(self, infile, endsplit = 7):
+    def _processRoomFile(self, infile, endsplit = 6):
         super()._processRoomFile(infile, endsplit)
 
 
     def _evaluateLine(self, line, endsplit):
-        line = list(map(int, map(float, line.replace("-1", "0").split()[:endsplit])))
+        line = list(map(float, line.replace("-1", "0").split()[:endsplit]))
         if line[2] != 0:
             line[2] = line[2] - self.minX
             line[3] = line[3] - self.minY
+        line = list(map(int, line))
         return line
         
 
@@ -158,32 +159,6 @@ class KT(CMSF):
 
 
 
-
-
-
-
-
-
-
-
-    def getDistance(self, skip = 25, time = 20, startTime = 0, minDifference = 0):
-        """computes total distance travelled (in metres),
-        argument 'skip' controls how many rows are skipped in distance computation,
-        argument 'time' is time of the session,
-        """
-        dist = 0
-        time = time * 60000 # conversion from minutes to miliseconds
-        start = self.findStart(startTime)
-        x0, y0 = self.data[start][self.indices] 
-        for content in self.data[(start + skip)::skip]:
-            if content[1] <= time:
-                x1, y1 = content[self.indices]
-                diff = ((x1 - x0)**2 + (y1 - y0)**2)**0.5
-                if diff > minDifference:
-                    dist += diff
-                x0, y0 = x1, y1
-        dist = dist / (self.trackerResolution * 100) # conversion from pixels to metres
-        return format(dist, "0.2f")
 
                 
     def getMaxT(self, time = 20, startTime = 0, lastTime = "fromParameter"):
