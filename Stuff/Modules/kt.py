@@ -27,12 +27,12 @@ from funcs import median
 from collections import OrderedDict
 
 
-from cm import CM
-#from singleframe import SF
+from cmsf import CMSF
 
 
 
-class KT(CM):
+
+class KT(CMSF):
     """
     each row of self.data contains following information:
     FrameCount(0) msTimeStamp(1) RoomX(2) RoomY(3) Sectors(4) State(5) CurrentLevel(6)...
@@ -55,7 +55,7 @@ class KT(CM):
         self.nameA = nameA
         self.data = []
         self.interpolated = set()
-        self.indices = slice(2,4) # zkontrolovat
+        self.indices = slice(2,4)
 
         # in cache?
         if self.nameA in KT.cache:
@@ -81,31 +81,14 @@ class KT(CM):
         if len(KT.cache) > 15:
             KT.cache.popitem(last = False)
 
-  
-    def _removalCondition(self, row, i, before, reflection):
-        """conditions in order of appearance:
-            large speed between the row and before row
-            same position as in the reflection row
-            we should expect the position to be closer to before row than to the
-            reflection row - determined by speed
-            wrong points in the row
-        """
-        return any((self._computeSpeed(self.data[row + i], before) > 250,
-                    self.data[row + i][2:4] == self.data[row][2:4],
-                    self._computeSpeed(reflection, self.data[row + i]) * 30 <
-                    self._computeSpeed(before, self.data[row + i]),
-                    row + i in self.interpolated))
-    
+     
 
     def _cacheRemoval(self):
         if self.nameA in KT.cache:
             KT.cache.pop(self.nameA) 
 
-    def removeReflections(self, *args, bothframes = False, **kwargs):
-        super().removeReflections(*args, bothframes = bothframes, **kwargs)
 
-
-   
+  
     def _processHeader(self, file):
         for line in file:
             if "TrackerVersion" in line:
@@ -145,9 +128,10 @@ class KT(CM):
             elif "END_HEADER" in line:
                 break
             
-        self.radius = self.trackerResolution * self.arenaDiameter * 100
-        
-        
+        self.radius = self.trackerResolution * self.arenaDiameter * 100 / 2
+        self.minX = self.centerX - self.radius
+        self.minY = self.centerY - self.radius
+             
 
     def _addReinforcedSector(self, string, position):
         self.centerAngle = eval(string[position+3])   
@@ -157,90 +141,21 @@ class KT(CM):
 
 
     def _processRoomFile(self, infile, endsplit = 7):
-        missing = []
-
-        count = -1
-        for line in infile:
-            try:
-                line = self._evaluateLine(line, endsplit)
-                self.data.append(line)
-            except Exception:
-                continue
-    
-            count += 1
-           
-            # missing points
-            if count + 1 != line[0]:
-                i = 1
-                while True:
-                    if self.data[-i][2] or self.data[-i][3]:
-                        break
-                    else:
-                        i += 1
-                        if count + 1 == i:
-                            break
-                if count + 1 != i:
-                    before = self.data[-i][2:4]
-                prev = self.data[-2]
-                number = line[0] - count
-                for row in range(1, number):
-                    timeStamp = ((line[1] - prev[1]) / (number)) * row + prev[1]
-                    filling = [count + 1, timeStamp, 0, 0] + prev[4:]
-                    missing.append(count)
-                    self.interpolated.add(count)
-                    self.data.insert(-1, filling)
-                    count += 1                       
-                                     
-            # wrong points
-            if (line[2] != 0 or line[3] != 0) and missing == []:
-                continue
-            elif line[2] == 0 and line[3] == 0 and missing == []:
-                if count != len(missing):
-                    before = self.data[count - 1][2:4]
-                    missing.append(count)
-                    self.interpolated.add(count)
-                else:
-                    before = []
-                    missing.append(count)
-                    self.interpolated.add(count)
-            elif line[2] == 0 and line[3] == 0 and missing != []:
-                missing.append(count)
-                self.interpolated.add(count)
-            elif (line[2] != 0 or line[3] != 0) and missing != []:
-                after = line[2:4]
-                if before != []:
-                    for missCounter, missLines in enumerate(missing, start=1):
-                        self.data[missLines][2] = ((after[0] - before[0]) / (len(missing) + 1)) \
-                                                  * missCounter + before[0]
-                        self.data[missLines][3] = ((after[1] - before[1]) / (len(missing) + 1)) \
-                                                  * missCounter + before[1]
-                missing = []
-        
-        if missing != [] and before:
-            for missLines in missing:
-                self.data[missLines][2:4] = before
+        super()._processRoomFile(infile, endsplit)
 
 
     def _evaluateLine(self, line, endsplit):
-        return list(map(int, line.split()[:endsplit]))
-
-
-
-
-    def _correctMissingFromBeginning(self):
-        beginMiss = 0
+        line = list(map(int, map(float, line.replace("-1", "0").split()[:endsplit])))
+        if line[2] != 0:
+            line[2] = line[2] - self.minX
+            line[3] = line[3] - self.minY
+        return line
         
-        for line in self.data:
-            if (line[2] == 0 and line[3] == 0) or (line[7] == 0 and line[8] == 0):
-                beginMiss += 1
-            else:
-                if beginMiss != 0:
-                    self.data = self.data[beginMiss:]
-                    for i in range(len(self.data)):
-                        self.data[i][0] -= beginMiss
-                    self.interpolated = {p - beginMiss for p in self.interpolated}
-                break
-           
+
+
+
+
+
 
 
 
@@ -1123,8 +1038,9 @@ class KT(CM):
 def main():
     filename = os.path.join(r"C:\Users\Štěpán\Desktop\CM Manager\CM_Manager_0_5_0\Data", "d06rat02.dat")
     kt = KT(filename)
-    for line in kt:
-        print(line)
+    for i in kt.data[:10]:
+        print(i)
+        
         
     
 
