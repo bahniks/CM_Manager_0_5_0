@@ -239,6 +239,8 @@ class Explorer(ttk.Frame):
             self.showShocks.grid(column = 1, row = 1, padx = 3, pady = 2, sticky = (N, W))
             self.showAnimation.grid(column = 0, row = 0, padx = 2, pady = 1, sticky = (N, W))
             self.showTrack.grid(column = 0, row = 1, padx = 2, pady = 1, sticky = (N, W))
+        if m.mode == "KT":
+            self.showShocks.grid(column = 1, row = 1, padx = 3, pady = 2, sticky = (N, W))
         
         self.speedEntry.grid(column = 0, row = 1)
 
@@ -582,7 +584,7 @@ class Explorer(ttk.Frame):
                 arena = []
                 for ax, ay in trail:
                     arena.append((ax*self.scale + adjust, ay*self.scale + adjust))
-                arena.append((curLine[2] + adjust, curLine[3] + adjust))
+                arena.append((curLine[2]*self.scale + adjust, curLine[3]*self.scale + adjust))
                 self.arenaCanv.create_line((arena), fill = "blue", width = 2, tag = "trailA")
 
 
@@ -785,19 +787,7 @@ class Explorer(ttk.Frame):
                                           fill = "black", width = 2)
                 
             self.arenaCanv.create_line(([i * self.scale + 20 for line in arena for i in line]),
-                                       fill = "black", width = 2)
-                
-            if self.showShocksVar.get():
-                indices = slice(2,4) if m.mode == "CM" else slice(7,9)
-                fun = self.roomCanv.create_oval if m.mode == "CM" else self.arenaCanv.create_oval
-                
-                shocks = [line[indices] for count, line in enumerate(self.cm.data) if
-                          self.minTime <= line[1] <= self.maxTime and line[6] > 0 and
-                          self.cm.data[count - 1][6] <= 0]
-                for shock in shocks:
-                    fun(shock[0]*self.scale + 16, shock[1]*self.scale + 16,
-                        shock[0]*self.scale + 24, shock[1]*self.scale + 24,
-                        outline = "red", width = 3)         
+                                       fill = "black", width = 2)      
         else:
             displayThreshold = floor(3/self.scale)
             data = [line[2:4] for line in self.cm.data if self.minTime <= line[1] <= self.maxTime]
@@ -811,6 +801,18 @@ class Explorer(ttk.Frame):
                 prev = line
             self.roomCanv.create_line(([item*self.scale + 20 for line in points for item in line]),
                                       fill = "black", width = 2)
+        if m.mode in ("CM", "RA", "KT"):
+            if self.showShocksVar.get():
+                indices = slice(2,4) if m.mode in ("CM", "KT") else slice(7,9)
+                fun = self.roomCanv.create_oval if m.mode in ("CM", "KT") else self.arenaCanv.create_oval
+                
+                shocks = [line[indices] for count, line in enumerate(self.cm.data) if
+                          self.minTime <= line[1] <= self.maxTime and line[self.cm.shockIndex] > 0 and
+                          self.cm.data[count - 1][self.cm.shockIndex] <= 0]
+                for shock in shocks:
+                    fun(shock[0]*self.scale + 16, shock[1]*self.scale + 16,
+                        shock[0]*self.scale + 24, shock[1]*self.scale + 24,
+                        outline = "red", width = 3)   
             
 
     def _initializeAnimation(self):
@@ -930,7 +932,9 @@ class Explorer(ttk.Frame):
                       "MWM": ("mobility", "immobility", "bad points", "thigmotaxis", "passes"),
                       "OF": ("mobility", "immobility", "bad points", "thigmotaxis"),
                       "RA": ("mobility", "immobility", "entrances", "shocks", "bad points",
-                             "thigmotaxis")}
+                             "thigmotaxis"),
+                      "KT": ("periodicity", "mobility", "immobility", "entrances", "shocks",
+                             "bad points", "thigmotaxis", "strategies")}
         parameters["CMSF"] = parameters["CM"]
 
         for parameter in parameters[m.mode]:

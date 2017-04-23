@@ -137,7 +137,8 @@ class CM:
             elif "END_HEADER" in line:
                 break
             
-        self.radius = max([self.centerX, self.centerY]) 
+        self.radius = max([self.centerX, self.centerY])
+        self.shockIndex = 6
 
 
     def _addReinforcedSector(self, string, position):
@@ -353,16 +354,16 @@ class CM:
         timePrev = startTime * 60000
         time = time * 60000 # conversion from minutes to miliseconds
         for content in self.data[start:]:
-            if content[5] != 2 and prev != 2 and content[1] <= time:
+            if content[self.shockIndex] != 2 and prev != 2 and content[1] <= time:
                 continue
-            elif content[5] != 2 and prev == 2 and content[1] <= time:
-                if content[5] == 4 or content[5] == 0:
+            elif content[self.shockIndex] != 2 and prev == 2 and content[1] <= time:
+                if content[self.shockIndex] == 4 or content[self.shockIndex] == 0:
                     prev = content[5]
                     timePrev = content[1]
                 continue
-            elif content[5] == 2 and prev == 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev == 2 and content[1] <= time:
                 continue
-            elif content[5] == 2 and prev != 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev != 2 and content[1] <= time:
                 maxT = max(content[1] - timePrev, maxT)
                 prev = 2
                 continue
@@ -392,9 +393,9 @@ class CM:
         startTime *= 60000
         T1 = 0
         for content in self.data[start:]:
-            if content[5] != 2:
+            if content[self.shockIndex] != 2:
                 continue
-            elif content[5] == 2:
+            elif content[self.shockIndex] == 2:
                 T1 = content[1] - startTime
                 break
             
@@ -417,15 +418,15 @@ class CM:
         shocks = []
         prev = 0
         for content in self.data[start:]:
-            if content[5] != 2 and prev != 2 and content[1] <= time:
+            if content[self.shockIndex] != 2 and prev != 2 and content[1] <= time:
                 continue
-            elif content[5] != 2 and prev == 2 and content[1] <= time:
-                if content[5] != 5:
-                    prev = content[5]
+            elif content[self.shockIndex] != 2 and prev == 2 and content[1] <= time:
+                if content[self.shockIndex] != 5:
+                    prev = content[self.shockIndex]
                 continue
-            elif content[5] == 2 and prev == 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev == 2 and content[1] <= time:
                 continue
-            elif content[5] == 2 and prev != 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev != 2 and content[1] <= time:
                 shocks.append(content[0])
                 prev = 2
                 continue
@@ -447,15 +448,15 @@ class CM:
         entrances = 0
         prev = 0
         for content in self.data[start:]:
-            if content[5] != 2 and prev != 2 and content[1] <= time:
+            if content[self.shockIndex] != 2 and prev != 2 and content[1] <= time:
                 continue
-            elif content[5] != 2 and prev == 2 and content[1] <= time:
-                if content[5] == 0: 
+            elif content[self.shockIndex] != 2 and prev == 2 and content[1] <= time:
+                if content[self.shockIndex] == 0: 
                     prev = 0
                 continue
-            elif content[5] == 2 and prev == 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev == 2 and content[1] <= time:
                 continue
-            elif content[5] == 2 and prev != 2 and content[1] <= time:
+            elif content[self.shockIndex] == 2 and prev != 2 and content[1] <= time:
                 entrances += 1
                 prev = 2
                 continue
@@ -743,7 +744,7 @@ class CM:
         start = self.findStart(startTime)
 
         shocks = [content[0] for content in self.data[start:] if
-                  content[5] == 2 and content[1] < time]
+                  content[self.shockIndex] == 2 and content[1] < time]
         if shocks:
             selected = [shocks[0]]
             prev = shocks[0]

@@ -135,7 +135,7 @@ class SetBatchTime(Toplevel):
 
         # text
         self.text = Text(self, height = 5, wrap = "word", width = 73)
-        self.text.insert("1.0", self.batchTime)
+        self.text.insert("1.0", str(self.batchTime))
         self.text.bind("<3>", lambda e: self.popUp(e))
         if not self.developer:
             self.text["state"] = "disabled"
@@ -155,7 +155,7 @@ class SetBatchTime(Toplevel):
         
         self.okBut.grid(column = 3, row = 2, pady = 2)
         self.closeBut.grid(column = 2, row = 2, pady = 2)
-        self.addBut.grid(column = 0, row = 2, columnspan = 2)
+        self.addBut.grid(column = 0, row = 2, columnspan = 2, sticky = EW)
         self.removeLastBut.grid(column = 0, row = 0, pady = 0)
         self.resetBut.grid(column = 0, row = 1, pady = 2)
         self.clearBut.grid(column = 0, row = 2, pady = 0)
@@ -164,13 +164,13 @@ class SetBatchTime(Toplevel):
 
         # +x buttons
         ttk.Button(self.buttonFrame, text = "+1", command = lambda: self.addTime(1),
-                   width = 3).grid(column = 0, row = 0)
+                   width = 4).grid(column = 0, row = 0)
         ttk.Button(self.buttonFrame, text = "+2", command = lambda: self.addTime(2),
-                   width = 3).grid(column = 1, row = 0)
+                   width = 4).grid(column = 1, row = 0)
         ttk.Button(self.buttonFrame, text = "+5", command = lambda: self.addTime(5),
-                   width = 3).grid(column = 0, row = 1)
+                   width = 4).grid(column = 0, row = 1)
         ttk.Button(self.buttonFrame, text = "+10", command = lambda: self.addTime(10),
-                   width = 3).grid(column = 1, row = 1)
+                   width = 4).grid(column = 1, row = 1)
         
 
     def _color(self):
@@ -203,7 +203,7 @@ class SetBatchTime(Toplevel):
         state = self.text["state"]
         self.text["state"] = "normal"
         self.text.delete("1.0", "end")
-        self.text.insert("1.0", self.batchTime) 
+        self.text.insert("1.0", str(self.batchTime))
         self.text["state"] = state
 
     def removeLastFun(self):

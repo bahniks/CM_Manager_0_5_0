@@ -174,7 +174,8 @@ class ShowTracks(Toplevel):
             self.cm.removeReflections(points = self.fileStorage.reflections[self.cm.nameA],
                                       deleteSame = True)               
             
-        r = self.cm.radius
+        self.scale = 136 / self.cm.radius
+        r = self.cm.radius * self.scale
     
         stopTime = int(self.fileTree.timeFrame.timeVar.get()) * 60000
         startTime = int(self.fileTree.timeFrame.startTimeVar.get()) * 60000
@@ -185,10 +186,10 @@ class ShowTracks(Toplevel):
             rangeBegin = startTime + timeRange * canvasNumber / self.numberOfCanvases
             rangeEnd = startTime + timeRange * (canvasNumber + 1) / self.numberOfCanvases
             if self.fileTree.frameVar.get() == "arena":
-                selectData = [line[7:9] + [line[0]] for line in self.cm.data if \
+                selectData = [[line[7]*self.scale, line[8]*self.scale, line[0]] for line in self.cm.data if \
                               rangeBegin <= line[1] <= rangeEnd]
             if self.fileTree.frameVar.get() == "room":
-                selectData = [line[2:4] + [line[0]] for line in self.cm.data if \
+                selectData = [[line[2]*self.scale, line[3]*self.scale, line[0]] for line in self.cm.data if \
                               rangeBegin <= line[1] <= rangeEnd]
             exec("self.canvas{}.drawTrack(r, data = selectData)".format(canvasNumber))
 

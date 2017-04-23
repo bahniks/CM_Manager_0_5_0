@@ -478,14 +478,14 @@ class DistanceFromCenterGraph(Graphs, SvgGraph):
         if m.mode == "RA":
             dists = [((line[7] - Cx)**2 + (line[8] - Cy)**2)**0.5 for line in cm.data[start:] if
                      line[1] <= self.maxTime]
-        elif m.mode != "OF":
-            dists = [((line[2] - Cx)**2 + (line[3] - Cy)**2)**0.5 for line in cm.data[start:] if
-                     line[1] <= self.maxTime]
-        else:
+        elif m.mode == "OF":
             r = self.radius
             lb, tb, rb, bb = Cx - r, Cy + r, Cx + r, Cy - r 
             dists = [r - min([line[2]-lb, rb-line[2], line[3]-bb, tb-line[3]]) for line in
-                     cm.data[start:] if line[1] <= self.maxTime]                
+                     cm.data[start:] if line[1] <= self.maxTime]    
+        else:
+            dists = [((line[2] - Cx)**2 + (line[3] - Cy)**2)**0.5 for line in cm.data[start:] if
+                     line[1] <= self.maxTime]
 
         self.maxY = self.radius + 10
         self.points = dists
@@ -633,7 +633,7 @@ class AngleGraph(Graphs, SvgGraph):
         self.compute(cm)
 
         # drawing lines representing the sector
-        if "CM" in m.mode:
+        if "CM" in m.mode or "KT" in m.mode:
             wid = cm.width   
             y1 = ((360 - (wid / 2)) / 360) * self.height
             y2 = ((wid / 2) / 360) * self.height
