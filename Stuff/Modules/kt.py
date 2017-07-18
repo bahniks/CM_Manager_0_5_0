@@ -56,6 +56,7 @@ class KT(CMSF):
         self.data = []
         self.interpolated = set()
         self.indices = slice(2,4)
+        self.processArena = False
 
         # in cache?
         if self.nameA in KT.cache:
@@ -68,6 +69,10 @@ class KT(CMSF):
             self.centerAngle = 0
             self._processHeader(infile)
             self._processRoomFile(infile)
+
+        if self.processArena:
+            with open(self.nameA, "r") as infile:
+                self._processArenaFile(infile)
 
         # discards missing points from beginning of self.data
         self._correctMissingFromBeginning()
@@ -125,6 +130,10 @@ class KT(CMSF):
                     if strg[i] == "(":
                         pos = i
                 self.arenaDiameter = eval(strg[pos+1])
+            elif "Row" in line and "RatArenaX" in line:
+                self.processArena = True
+                self.indicesA = slice(12, 14) #
+                self.indices = slice(7,9) #
             elif "END_HEADER" in line:
                 break
             
@@ -144,12 +153,21 @@ class KT(CMSF):
         self.width = eval(string[position+4])         
 
 
-    def _processRoomFile(self, infile, endsplit = 6):
+    def _processRoomFile(self, infile, endsplit = 7):
+        self.inArena = False
         super()._processRoomFile(infile, endsplit)
 
 
+    def _processArenaFile(self, infile):
+        self.inArena = True
+        super()._processArenaFile(infile)
+
+
     def _evaluateLine(self, line, endsplit):
-        line = list(map(float, line.replace("-1", "0").split()[:endsplit]))
+        line = list(map(float, line.replace("-1", "0").split()))
+        if self.inArena:
+            line[2:4] = line[self.indicesA]
+        line = line[:endsplit]
         if line[2] != 0:
             line[2] = line[2] - self.minX
             line[3] = line[3] - self.minY
@@ -189,18 +207,12 @@ class KT(CMSF):
 
 
 def main():
-    filename = os.path.join(r"C:\Users\Štěpán\Desktop\CM Manager\CM_Manager_0_5_0\Data", "d06rat10.dat")
+    filename = os.path.join(r"C:\Users\Štěpán\Desktop\CM Manager\CM_Manager_0_5_0\New data", "d37rat14_ARENA.dat")
     kt = KT(filename)
-    print(min([line[2] for line in kt.data]) + kt.minX)
-    print(max([line[2] for line in kt.data]) + kt.minX)
-    print(min([line[3] for line in kt.data]) + kt.minY)
-    print(max([line[3] for line in kt.data]) + kt.minY)
-    print(kt.centerX)
-    print(kt.centerY)
-    print(kt.radius)
-    print(kt.minX)
-    print(kt.minY)
-        
+    for i in range(10):
+        print(kt.data[i])
+    print(max([x[3] for x in kt.data]))
+
         
     
 

@@ -94,14 +94,14 @@ class Explorer(ttk.Frame):
         self.timeLabFrame = ttk.Labelframe(self, text = "Time")
         self.timeLabFrame.root = self
         self.timeFrame = TimeFrame(self.timeLabFrame, onChange = True)
-        if m.mode == "CM":
+        if m.mode in ("CM", "KT"):
             arenaText = "Arena frame"
         elif m.mode == "RA":
             arenaText = "Room frame"
         else:
             arenaText = "Animation"
         self.arenaFrame = ttk.LabelFrame(self, text = arenaText)
-        if m.mode == "CM":
+        if m.mode in ("CM", "KT"):
             roomText = "Room frame"
         elif m.mode == "RA":
             roomText = "Robot frame"
@@ -235,12 +235,10 @@ class Explorer(ttk.Frame):
         self.removeReflections.grid(column = 1, row = 0, padx = 3, pady = 2, sticky = (N, W))
         self.showTail.grid(column = 1, row = 2, padx = 3, pady = 2, sticky = (N, W))
 
-        if m.files == "pair":
+        if m.files == "pair" or m.mode == "KT":
             self.showShocks.grid(column = 1, row = 1, padx = 3, pady = 2, sticky = (N, W))
             self.showAnimation.grid(column = 0, row = 0, padx = 2, pady = 1, sticky = (N, W))
             self.showTrack.grid(column = 0, row = 1, padx = 2, pady = 1, sticky = (N, W))
-        if m.mode == "KT":
-            self.showShocks.grid(column = 1, row = 1, padx = 3, pady = 2, sticky = (N, W))
         
         self.speedEntry.grid(column = 0, row = 1)
 
@@ -455,7 +453,7 @@ class Explorer(ttk.Frame):
         Ax *= self.scale
         Ay *= self.scale
 
-        if m.mode == "CM":
+        if m.mode in ("CM", "KT"):
             Rx, Ry = curLine[2:4]
             Rx *= self.scale
             Ry *= self.scale
@@ -548,7 +546,7 @@ class Explorer(ttk.Frame):
             adjust = 150 - self.cm.radius * self.scale
             start = end - 500 if end > 500 else 0
             start = round(start*2, -1) // 2
-            if m.mode == "CM":
+            if m.mode in ("CM", "KT"):
                 trail = [tuple(content[2:4] + content[7:9]) for content in
                          self.cm.data[start:end:5]]
                 arena = []
@@ -589,7 +587,7 @@ class Explorer(ttk.Frame):
 
 
     def _setShockColor(self, curLine):
-        if (m.mode == "CM" and curLine[6] > 0) or (m.mode == "MWM" and curLine[-1] > 0):
+        if (m.mode in ("CM", "KT") and curLine[6] > 0) or (m.mode == "MWM" and curLine[-1] > 0):
             self.roomCanv.itemconfigure("ratR", fill = "red", outline = "red")
             self.shock = True
         elif m.mode == "RA":
@@ -674,10 +672,10 @@ class Explorer(ttk.Frame):
         self.maxTime = min([self.cm.data[-1][1], eval(self.timeFrame.timeVar.get()) * 60000])
         self.minTime = max([self.cm.data[0][1], eval(self.timeFrame.startTimeVar.get()) * 60000])
 
-        if self.showTrackVar.get() or m.files != "pair":
+        if self.showTrackVar.get() or m.files != "pair" or m.mode == "KT":
             self._drawTrack()
             
-        if not self.showTrackVar.get() or m.files != "pair":
+        if not self.showTrackVar.get() or m.files != "pair" or m.mode == "KT":
             self._initializeAnimation()
 
         self._setParameterDisplays(timeReset)
@@ -761,7 +759,7 @@ class Explorer(ttk.Frame):
 
             
     def _drawTrack(self):
-        if m.mode == "CM" or m.mode == "RA":
+        if m.mode in ("CM", "RA", "KT"):
             data = [line[2:4] + line[6:9] for line in self.cm.data if
                     self.minTime <= line[1] <= self.maxTime]
             arena = []
@@ -776,7 +774,7 @@ class Explorer(ttk.Frame):
                     last = count
                 prev = line
 
-            if m.mode == "CM":
+            if m.mode in ("CM", "KT"):
                 self.roomCanv.create_line(([i * self.scale + 20 for line in room for i in line]),
                                           fill = "black", width = 2)
             else:
@@ -829,7 +827,7 @@ class Explorer(ttk.Frame):
             return
         
         # makes 'the rat' (i.e. two black points)
-        if m.files == "pair":            
+        if m.files == "pair" or m.mode == "KT":            
             Rx, Ry = curLine[2:4]
             Rx *= self.scale
             Ry *= self.scale
@@ -842,7 +840,7 @@ class Explorer(ttk.Frame):
             self.arenaCanv.create_line((Ax + 19, Ay + 19, Ax + 21, Ay + 21), fill = "blue",
                                        width = 2, tag = "trailA")
             
-        if m.mode == "CM":
+        if m.mode in ("CM", "KT"):
             if self.showTailVar.get():
                 self.roomCanv.create_line((Rx + 19, Ry + 19, Rx + 21, Ry + 21),
                                           fill = "blue", width = 2, tag = "trailR")   
