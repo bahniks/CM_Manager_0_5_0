@@ -132,7 +132,8 @@ class KT(CMSF):
                 self.arenaDiameter = eval(strg[pos+1])
             elif "Row" in line and "RatArenaX" in line:
                 self.processArena = True
-                self.indicesA = slice(6,8) # neni nastaveny aby se automaticky nacetlo
+                index = line.split().index("RatArenaX")
+                self.indicesA = slice(index - 2, index)
                 self.indices = slice(7,9) # neni nastaveny aby se automaticky nacetlo
             elif "END_HEADER" in line:
                 break
