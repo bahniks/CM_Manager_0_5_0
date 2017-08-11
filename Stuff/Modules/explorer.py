@@ -554,8 +554,8 @@ class Explorer(ttk.Frame):
                 for rx, ry, ax, ay in trail:
                     arena.append((ax*self.scale + adjust, ay*self.scale + adjust))
                     room.append((rx*self.scale + adjust, ry*self.scale + adjust))
-                arena.append((curLine[7] + adjust, curLine[8] + adjust))
-                room.append((curLine[2] + adjust, curLine[3] + adjust))
+                arena.append((curLine[7]*self.scale + adjust, curLine[8]*self.scale + adjust))
+                room.append((curLine[2]*self.scale + adjust, curLine[3]*self.scale + adjust))
                 self.arenaCanv.create_line((arena), fill = "blue", width = 2, tag = "trailA")
                 self.roomCanv.create_line((room), fill = "blue", width = 2, tag = "trailR")
             elif m.mode == "RA":
@@ -672,10 +672,10 @@ class Explorer(ttk.Frame):
         self.maxTime = min([self.cm.data[-1][1], eval(self.timeFrame.timeVar.get()) * 60000])
         self.minTime = max([self.cm.data[0][1], eval(self.timeFrame.startTimeVar.get()) * 60000])
 
-        if self.showTrackVar.get() or m.files != "pair" or m.mode == "KT":
+        if self.showTrackVar.get() or (m.files != "pair" and m.mode != "KT"):
             self._drawTrack()
             
-        if not self.showTrackVar.get() or m.files != "pair" or m.mode == "KT":
+        if not self.showTrackVar.get() or (m.files != "pair" and m.mode != "KT"):
             self._initializeAnimation()
 
         self._setParameterDisplays(timeReset)

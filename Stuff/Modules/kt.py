@@ -132,8 +132,8 @@ class KT(CMSF):
                 self.arenaDiameter = eval(strg[pos+1])
             elif "Row" in line and "RatArenaX" in line:
                 self.processArena = True
-                self.indicesA = slice(12, 14) #
-                self.indices = slice(7,9) #
+                self.indicesA = slice(6,8) # neni nastaveny aby se automaticky nacetlo
+                self.indices = slice(7,9) # neni nastaveny aby se automaticky nacetlo
             elif "END_HEADER" in line:
                 break
             
@@ -207,13 +207,20 @@ class KT(CMSF):
 
 
 def main():
-    filename = os.path.join(r"C:\Users\Štěpán\Desktop\CM Manager\CM_Manager_0_5_0\New data", "d37rat14_ARENA.dat")
+    filename = os.path.join(r"C:\Users\Štěpán\Desktop\CM Manager\CM_Manager_0_5_0\d01", "d01rat01_ARENA.dat")
     kt = KT(filename)
     for i in range(10):
         print(kt.data[i])
+    print(max([x[2] for x in kt.data]))
+    print(min([x[2] for x in kt.data]))
     print(max([x[3] for x in kt.data]))
-
-        
+    print(min([x[3] for x in kt.data]))
+    print(max([x[6] for x in kt.data]))
+    print(min([x[6] for x in kt.data]))
+    print(max([x[7] for x in kt.data]))
+    print(min([x[7] for x in kt.data]))
+    print(kt.minX)
+    print(kt.minY)
     
 
                                        
