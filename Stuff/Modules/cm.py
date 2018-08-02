@@ -214,7 +214,7 @@ class CM:
 
 
     def _evaluateLine(self, line, endsplit):
-        return list(map(int, line.split()[:endsplit]))
+        return list(map(int, line.replace("*", "0").split()[:endsplit]))
 
 
     def _processArenaFile(self, infile):
